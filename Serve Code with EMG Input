@@ -1,0 +1,153 @@
+#include <Servo.h>  // servo library
+
+Servo Pointer;  // servo control pointer
+Servo Middle; //servo control middle
+Servo Ring; //servo control ring
+Servo Little; //servo control little
+Servo Thumb; //servo control thumb
+Servo Wrist;   //servo control wrist
+
+// Analog input pin that the potentiometer is attached to
+const int analogInPin1 = A0; 
+const int analogInPin2 = A1;
+const int analogInPin3 = A2;
+
+// Analog output pin that the LED is attached to
+const int analogOutPin1 = 9; 
+const int analogOutPin2 = 10;
+const int analogOutPin3 = 11;
+
+// value read from the potentiometer
+int sensorValue1 = 0;
+int sensorValue2 = 0;
+int sensorValue3 = 0;
+
+ // value output to the PWM (analog out)
+int outputValue1 = 0;       
+int outputValue2 = 0;
+int outputValue3 = 0;
+
+int deli = 2;	// delay value
+int closed = 0;	// servo angle for closed hand
+int opened = 130;	// servo angle for opened hand
+
+// sensor1 output values
+int s1a = 0;
+int s1b = 0; 
+int s1c = 0; 
+int s1d = 0;
+int s1e = 0;
+int s1f = 0;
+int s1g = 0;
+int s1h = 0;
+
+// sensor2 output values
+int s2a = 0;
+int s2b = 0; 
+int s2c = 0; 
+int s2d = 0;
+int s2e = 0;
+
+// sensor3 output values
+int s3a = 0;
+int s3b = 0; 
+int s3c = 0; 
+int s3d = 0;
+int s3e = 0;
+
+void setup() {
+
+// attaches all servos to Arduino pins
+  Pointer.attach(3);
+  Middle.attach(5);
+  Ring.attach(6);
+  Little.attach(9);
+  Thumb.attach(10);
+  Wrist.attach(11);
+  Serial.begin(9600);	// begins serial output
+
+// opens hand to start
+  Pointer.write(130);
+  Middle.write(130);
+  Ring.write(130);
+  Little.write(130);
+  Thumb.write(130);
+}
+
+void loop() {
+
+  // read the analog in value:
+  sensorValue1 = analogRead(analogInPin1);
+  sensorValue2 = analogRead(analogInPin2);
+  sensorValue3 = analogRead(analogInPin3);
+
+  // map it to the range of the analog out:
+  outputValue1 = map(sensorValue1, 0, 1023, 0, 255);
+  outputValue2 = map(sensorValue2, 0, 1023, 0, 255);
+  outputValue3 = map(sensorValue3, 0, 1023, 0, 255);
+
+  s1a = outputValue1;	// sets sensor1 value a to current output value
+  int temp1 = s1a;	// temporary variable equal to s1a
+  int thresh1 = 100;	// sets threshold value for sensor1
+  s2a = outputValue2;	// sets sensor2 value a to current output value
+  int temp2 = s2a;	// temporary variable equal to s2a
+  int thresh2 = 100;	// sets threshold value for sensor2
+  s3a = outputValue3;	// sets sensor3 value a to current output value
+  int temp3 = s3a;	// temporary variable equal to s3a
+  int thresh3 = 100;	// sets threshold value for sensor3
+  
+// conditions for moving thumb
+  if(s3a > thresh3 && s3b > thresh3 && s3c > thresh3 && s3d > thresh3 && s3e > thresh3)
+  {
+    Thumb.write(closed);
+  }
+  else if(s3a <= thresh3)
+  {
+    Thumb.write(opened);
+  }
+
+// conditions for moving middle, ring, and little
+  if(s1a > thresh1 && s1b > thresh1 && s1c > thresh1 && s1d > thresh1 && s1e > thresh1 && s1f > thresh1 && s1g > thresh1 && s1h > thresh1)
+  {
+    Middle.write(closed);
+    Ring.write(closed);
+    Little.write(closed);
+  }
+  else if(s1a <= thresh1)
+  {
+    Middle.write(opened);
+    Ring.write(opened);
+    Little.write(opened);
+  }
+
+// conditions for moving pointer
+  if(s2a > thresh2 && s2b > thresh2 && s2c > thresh2 && s2d > thresh2 && s2e > thresh2)
+  {
+    Pointer.write(closed);
+  }
+  else if(s2a <= thresh2)
+  {
+    Pointer.write(opened);
+  }
+
+// shifts all sensor1 values up one
+  s1h = s1g;
+  s1g = s1f;
+  s1f = s1e;
+  s1e = s1d;
+  s1d = s1c;
+  s1c = s1b;
+  s1b = temp1;
+
+// shifts all sensor2 values up one
+  s2e = s2d;
+  s2d = s2c;
+  s2c = s2b;
+  s2b = temp2;
+
+// shifts all sensor3 values up one
+  s3e = s3d;
+  s3d = s3c;
+  s3c = s3b;
+  s3b = temp3;
+}
